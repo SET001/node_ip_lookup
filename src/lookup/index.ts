@@ -1,0 +1,1 @@
+export { lookupRouter } from './router'
