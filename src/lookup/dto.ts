@@ -1,11 +1,11 @@
 export interface LookupDTO {
-	ip: String
+	ip: string
 	// type: "IPv4"
 	// continent: "Europe"
 	// continent_code: "EU"
-	country: String
+	country: string
 	// country_code: "UA"
-	region: String
+	region: string
 	// region_code: "30"
-	city: String
+	city: string
 }

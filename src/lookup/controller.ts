@@ -3,19 +3,19 @@ import { CacheService, LookupService } from "./service";
 import { LookupDTO } from "./dto";
 
 class Lookuprequest {
-	ip: String
+	ip: string
 }
 
 export class LookupController {
 	constructor(
 		public lookupService: LookupService,
-		public lookupCacheService: CacheService<String, LookupDTO>
+		public lookupCacheService: CacheService<string, LookupDTO>
 	) { }
 
 	async lookup(req: Request<Lookuprequest>, res: Response) {
 		const ip = req.params.ip;
 
-		let cache = await this.lookupCacheService.get(ip);
+		const cache = await this.lookupCacheService.get(ip);
 		if (cache === null) {
 			const result = await this.lookupService.lookup(ip);
 			if (typeof result === 'string') {

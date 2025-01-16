@@ -1,7 +1,7 @@
 import { LookupDTO } from "./dto";
 
 export interface LookupService {
-	lookup(ip: String): Promise<LookupDTO | String>
+	lookup(ip: string): Promise<LookupDTO | string>
 }
 
 export interface CacheService<K, V> {

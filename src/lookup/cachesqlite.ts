@@ -10,7 +10,7 @@ type LookupDB = LookupDTO & {
 	created_at: number
 }
 
-export class LookupCacheSQLite implements CacheService<String, LookupDTO> {
+export class LookupCacheSQLite implements CacheService<string, LookupDTO> {
 	db: Database
 	select: Statement
 	insert: Statement
@@ -48,7 +48,7 @@ export class LookupCacheSQLite implements CacheService<String, LookupDTO> {
 		})
 	}
 
-	get(key: String): Promise<LookupDTO | null> {
+	get(key: string): Promise<LookupDTO | null> {
 		return new Promise((resolve, reject) => {
 			this.select.get(key, async (err: Error, res: LookupDB) => {
 				if (err) {
@@ -56,7 +56,7 @@ export class LookupCacheSQLite implements CacheService<String, LookupDTO> {
 				} else {
 					if (res) {
 						const { ip, country, region, city, created_at } = res;
-						let time_passed = Date.now() - created_at;
+						const time_passed = Date.now() - created_at;
 						if ((Date.now() - created_at) / 1000 > TTL) {
 							await this.remove(key);
 							resolve(null);
@@ -71,7 +71,7 @@ export class LookupCacheSQLite implements CacheService<String, LookupDTO> {
 		})
 	}
 
-	remove(key: String): Promise<void> {
+	remove(key: string): Promise<void> {
 		return new Promise((resolve, reject) => {
 			this.delete.run(key, error => {
 				if (error) {
