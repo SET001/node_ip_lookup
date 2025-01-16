@@ -56,7 +56,6 @@ export class LookupCacheSQLite implements CacheService<string, LookupDTO> {
 				} else {
 					if (res) {
 						const { ip, country, region, city, created_at } = res;
-						const time_passed = Date.now() - created_at;
 						if ((Date.now() - created_at) / 1000 > TTL) {
 							await this.remove(key);
 							resolve(null);
