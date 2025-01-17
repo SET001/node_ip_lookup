@@ -17,7 +17,7 @@ npm run dev
 - TABLE - DB table name
 - TTL - time to live for cached values in seconds
 
-## Min points
+## Main points
 - controller rely on interfaces. It is possible to implement redis based caching or different whois provider. Controller logic will not change.
 - error handling
 - request-specific logger with formatting and requestID
