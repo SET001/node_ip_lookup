@@ -1,3 +1,5 @@
+Repo with solution for [Backend Position Technical Task](https://gist.github.com/kami4ka/40ad1f66be45bb37cabdb94f9923d721)
+
 ## Install
 ```
 npm install
