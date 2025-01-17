@@ -25,7 +25,7 @@ npm run dev
 
 ## Notices
 - to simplify things I only used limited set of data from what ipwhois.io is providing
-- I implemented caching with sqlite in-memory DB to simplify deployment of this app. It is possible to implement redis based cache (wich support TTLs out of the box) but that would require additionall steps to prepare deployment infrastructure
+- I implemented caching with sqlite in-memory DB to simplify deployment of this app. It is possible to implement cache based on any other DB - for instance redis based (wich support TTLs out of the box). But that would require additionall steps to prepare deployment infrastructure.
  
 ## Todo
 - [ ] better file structure
