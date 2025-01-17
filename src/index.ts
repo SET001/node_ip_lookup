@@ -2,6 +2,7 @@ import express, { NextFunction, Request, Response } from "express";
 import { getLookupRouter } from './lookup';
 import { logger } from './logger'
 import { requestLogger } from "./middleware";
+import { config } from './config';
 
 (async () => {
 	express()
@@ -16,7 +17,7 @@ import { requestLogger } from "./middleware";
 				.status(500)
 				.send("Server error")
 		})
-		.listen(3000, () => { logger.info("App is running") });
+		.listen(config.port, () => { logger.info("App is started", { config }) });
 })().catch(() => {
 	logger.error("Cannot start server");
 })

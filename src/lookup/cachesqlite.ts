@@ -4,12 +4,14 @@ import { LookupDTO } from "./dto";
 import { CacheService } from "./service";
 import { Database, Statement } from "sqlite3";
 
-const TABLE_NAME = 'lookups';
-const DB_NAME = ':memory:';
-const TTL = 60;	//	in seconds
-
 type LookupDB = LookupDTO & {
 	created_at: number
+}
+
+export class LookupCacheSQLiteConfig {
+	table_name: string = "lookups"
+	db_name: string = ":memory:"
+	ttl: number = 60	//	in seconds
 }
 
 export class LookupCacheSQLite implements CacheService<string, LookupDTO> {
@@ -18,13 +20,16 @@ export class LookupCacheSQLite implements CacheService<string, LookupDTO> {
 	insert: Statement
 	delete: Statement
 
-	constructor() {
-		this.db = new Database(DB_NAME);
+	constructor(
+		public config: LookupCacheSQLiteConfig
+	) {
+		this.db = new Database(this.config.db_name);
 	}
 
 	async init(): Promise<void> {
+		const table_name = this.config.table_name;
 		return new Promise((resolve, reject) => {
-			this.db.run(`CREATE TABLE IF NOT EXISTS ${TABLE_NAME}(
+			this.db.run(`CREATE TABLE IF NOT EXISTS ${table_name}(
 				id INTEGER PRIMARY KEY,
 				ip TEXT NOT NULL,
 				country TEXT NOT NULL,
@@ -36,9 +41,9 @@ export class LookupCacheSQLite implements CacheService<string, LookupDTO> {
 					this.getLogger().error(`failed to create table, ${err}`)
 					reject();
 				} else {
-					this.select = this.db.prepare(`SELECT ip, country, region, city, created_at FROM ${TABLE_NAME} WHERE ip = ?`);
-					this.insert = this.db.prepare(`INSERT INTO ${TABLE_NAME}(ip, country, region, city, created_at) VALUES(?, ?, ?, ?, ?)`);
-					this.delete = this.db.prepare(`DELETE FROM ${TABLE_NAME} WHERE ip = ?`);
+					this.select = this.db.prepare(`SELECT ip, country, region, city, created_at FROM ${table_name} WHERE ip = ?`);
+					this.insert = this.db.prepare(`INSERT INTO ${table_name}(ip, country, region, city, created_at) VALUES(?, ?, ?, ?, ?)`);
+					this.delete = this.db.prepare(`DELETE FROM ${table_name} WHERE ip = ?`);
 					resolve();
 				}
 			});
@@ -75,7 +80,7 @@ export class LookupCacheSQLite implements CacheService<string, LookupDTO> {
 				} else {
 					if (res) {
 						const { ip, country, region, city, created_at } = res;
-						if ((Date.now() - created_at) / 1000 > TTL) {
+						if ((Date.now() - created_at) / 1000 > this.config.ttl) {
 							logger.debug(`key TLL run out`);
 							await this.remove(key);
 							resolve(null);
