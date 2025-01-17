@@ -23,6 +23,10 @@ npm run dev
 - request-specific logger with formatting and requestID
 - configuration throught env variables
 
+## Notices
+- to simplify things I only used limited set of data from what ipwhois.io is providing
+- I implemented caching with sqlite in-memory DB to simplify deployment of this app. It is possible to implement redis based cache (wich support TTLs out of the box) but that would require additionall steps to prepare deployment infrastructure
+ 
 ## Todo
 - [ ] better file structure
 - [ ] validate incoming params
