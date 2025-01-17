@@ -1,3 +1,5 @@
+import { Logger } from "winston";
+import { getLogger, logger } from "../logger";
 import { LookupDTO } from "./dto";
 import { CacheService } from "./service";
 import { Database, Statement } from "sqlite3";
@@ -18,29 +20,43 @@ export class LookupCacheSQLite implements CacheService<string, LookupDTO> {
 
 	constructor() {
 		this.db = new Database(DB_NAME);
-		this.db.run(`CREATE TABLE IF NOT EXISTS ${TABLE_NAME}(
-			id INTEGER PRIMARY KEY,
-			ip TEXT NOT NULL,
-			country TEXT NOT NULL,
-			region TEXT NOT NULL,
-			city TEXT NOT NULL,
-			created_at INTEGER NOT NULL
-		)`, (err) => {
-			if (err) {
-				console.log({ err })
-			} else {
-				this.select = this.db.prepare(`SELECT ip, country, region, city, created_at FROM ${TABLE_NAME} WHERE ip = ?`);
-				this.insert = this.db.prepare(`INSERT INTO ${TABLE_NAME}(ip, country, region, city, created_at) VALUES(?, ?, ?, ?, ?)`);
-				this.delete = this.db.prepare(`DELETE FROM ${TABLE_NAME} WHERE ip = ?`);
-			}
-		});
+	}
+
+	async init(): Promise<void> {
+		return new Promise((resolve, reject) => {
+			this.db.run(`CREATE TABLE IF NOT EXISTS ${TABLE_NAME}(
+				id INTEGER PRIMARY KEY,
+				ip TEXT NOT NULL,
+				country TEXT NOT NULL,
+				region TEXT NOT NULL,
+				city TEXT NOT NULL,
+				created_at INTEGER NOT NULL
+			)`, (err) => {
+				if (err) {
+					this.getLogger().error(`failed to create table, ${err}`)
+					reject();
+				} else {
+					this.select = this.db.prepare(`SELECT ip, country, region, city, created_at FROM ${TABLE_NAME} WHERE ip = ?`);
+					this.insert = this.db.prepare(`INSERT INTO ${TABLE_NAME}(ip, country, region, city, created_at) VALUES(?, ?, ?, ?, ?)`);
+					this.delete = this.db.prepare(`DELETE FROM ${TABLE_NAME} WHERE ip = ?`);
+					resolve();
+				}
+			});
+		})
+	}
+
+	getLogger(): Logger {
+		return getLogger('LookupCacheSQLite');
 	}
 
 	add({ ip, city, region, country }: LookupDTO): Promise<void> {
+		const logger = this.getLogger();
+		logger.debug(`adding value for key: ${ip}`);
 		return new Promise<void>((resolve, reject) => {
-			this.insert.run([ip, city, region, country, Date.now()], (err) => {
-				if (err) {
-					reject(err)
+			this.insert.run([ip, city, region, country, Date.now()], error => {
+				if (error) {
+					logger.error(error);
+					reject()
 				} else {
 					resolve()
 				}
@@ -49,20 +65,26 @@ export class LookupCacheSQLite implements CacheService<string, LookupDTO> {
 	}
 
 	get(key: string): Promise<LookupDTO | null> {
+		const logger = this.getLogger();
+		logger.debug(`searching for: ${key}`);
 		return new Promise((resolve, reject) => {
-			this.select.get(key, async (err: Error, res: LookupDB) => {
-				if (err) {
-					reject(err)
+			this.select.get(key, async (error: Error, res: LookupDB) => {
+				if (error) {
+					logger.error(error);
+					reject()
 				} else {
 					if (res) {
 						const { ip, country, region, city, created_at } = res;
 						if ((Date.now() - created_at) / 1000 > TTL) {
+							logger.debug(`key TLL run out`);
 							await this.remove(key);
 							resolve(null);
 						} else {
+							logger.debug(`key found`);
 							resolve({ ip, country, region, city });
 						}
 					} else {
+						logger.debug(`key is not found`);
 						resolve(null);
 					}
 				}
@@ -71,10 +93,12 @@ export class LookupCacheSQLite implements CacheService<string, LookupDTO> {
 	}
 
 	remove(key: string): Promise<void> {
+		this.getLogger().debug(`removing key ${key}`);
 		return new Promise((resolve, reject) => {
 			this.delete.run(key, error => {
 				if (error) {
-					reject(error)
+					logger.error(error);
+					reject()
 				} else {
 					resolve()
 				}

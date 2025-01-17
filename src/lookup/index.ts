@@ -1,1 +1,1 @@
-export { lookupRouter } from './router'
+export { getLookupRouter } from './router'

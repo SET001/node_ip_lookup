@@ -3,11 +3,18 @@ import { LookupController } from "./controller";
 import { IpWhois } from "./ipwhois";
 import { LookupCacheSQLite } from "./cachesqlite";
 
-const controller = new LookupController(new IpWhois(), new LookupCacheSQLite());
+export async function getLookupRouter() {
+	const cache = new LookupCacheSQLite();
+	await cache.init();
 
-export const lookupRouter = express.Router();
+	const controller = new LookupController(new IpWhois(), cache);
 
-lookupRouter
-	.route('/lookup/:ip')
-	.get(controller.lookup.bind(controller))
-	.delete(controller.remove.bind(controller));
+	const lookupRouter = express.Router();
+
+	lookupRouter
+		.route('/lookup/:ip')
+		.get(controller.lookup.bind(controller))
+		.delete(controller.remove.bind(controller));
+
+	return lookupRouter;
+}

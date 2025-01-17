@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { CacheService, LookupService } from "./service";
 import { LookupDTO } from "./dto";
+import { getLogger } from "../logger";
 
-class Lookuprequest {
+class LookupRequest {
 	ip: string
 }
 
@@ -12,30 +13,34 @@ export class LookupController {
 		public lookupCacheService: CacheService<string, LookupDTO>
 	) { }
 
-	async lookup(req: Request<Lookuprequest>, res: Response) {
-		const ip = req.params.ip;
+	async lookup(req: Request<LookupRequest>, res: Response) {
+		const { params: { ip } } = req;
+		const logger = getLogger();
+
+		logger.log('info', 'lookup request', { ip });
 
 		const cache = await this.lookupCacheService.get(ip);
 		if (cache === null) {
 			const result = await this.lookupService.lookup(ip);
 			if (typeof result === 'string') {
-				console.log("error: ", result);
+				logger.log('info', `responding with error: ${result}`);
 				res
 					.status(400)
 					.send(result)
 			} else {
 				this.lookupCacheService.add(result as LookupDTO);
-				console.log("responding with new lookup result: ", result);
+				logger.log('info', 'responding with new lookup result', { result });
 				res.json(result);
 			}
 		} else {
-			console.log("responding with cached result: ", cache);
+			logger.log('info', 'responding with cached result', { cache });
 			res.json(cache);
 		}
 	}
 
 	async remove(req: Request, res: Response) {
-		const ip = req.params.ip;
+		const { ip } = req.params;
+		getLogger().log('info', 'remove request', { ip });
 		await this.lookupCacheService.remove(ip)
 		res.send("ok");
 	}
