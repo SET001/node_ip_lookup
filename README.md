@@ -18,7 +18,7 @@ npm run dev
 - TTL - time to live for cached values in seconds
 
 ## Main points
-- controller rely on interfaces. It is possible to implement redis based caching or different whois provider. Controller logic will not change.
+- controller rely on interfaces. It is possible to, for instance, implement redis based caching. Or implement work with different whois provider. Controller logic will not change.
 - error handling
 - request-specific logger with formatting and requestID
 - configuration throught env variables
