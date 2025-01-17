@@ -26,6 +26,7 @@ npm run dev
 ## Notices
 - to simplify things I only used limited set of data from what ipwhois.io is providing
 - I implemented caching with sqlite in-memory DB to simplify deployment of this app. It is possible to implement cache based on any other DB - for instance redis based (wich support TTLs out of the box). But that would require additionall steps to prepare deployment infrastructure.
+- for indentation in code, I'm using tabs of size 2. Github uses 4 spaces to replace tabs. That's why code might look lousy in GH. This can be simply solved - https://github.com/tiimgreen/github-cheat-sheet#adjust-tab-space
  
 ## Todo
 - [ ] better file structure
