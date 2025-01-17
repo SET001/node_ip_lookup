@@ -8,3 +8,14 @@ export function requestLogger(req: Request, res: Response, next: NextFunction) {
 	}));
 	next();
 }
+
+export function errorHandler(error: Error, _req: Request, res: Response, _next: NextFunction) {
+	if (error.message) {
+		logger.error(`General error: ${error}`);
+	}
+	res
+		.status(500)
+		.send("Server error")
+}
+
+export function notFoundPage(_: Request, res: Response) { res.status(404).send("Page not found") }
